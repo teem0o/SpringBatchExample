@@ -16,17 +16,22 @@
 package io.spring.batch.configuration;
 
 import io.spring.batch.model.Customer;
-import io.spring.batch.model.CustomerFieldSetMapper;
+import io.spring.batch.model.CustomerExcelRowMapper;
+//import io.spring.batch.model.CustomerFieldSetMapper;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
+import org.springframework.batch.item.excel.RowMapper;
+import org.springframework.batch.item.excel.mapping.BeanWrapperRowMapper;
+import org.springframework.batch.item.excel.poi.PoiItemReader;
 import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,28 +57,42 @@ public class JobConfiguration {
 	public DataSource dataSource;
 
 	@Bean
-	public FlatFileItemReader<Customer> customerItemReader() {
-		FlatFileItemReader<Customer> reader = new FlatFileItemReader<>();
-
+	ItemReader<Customer> excelItemReader() {
+		PoiItemReader<Customer> reader = new PoiItemReader<>();
 		reader.setLinesToSkip(1);
-		reader.setResource(new ClassPathResource("/data/customer.csv"));
-
-		DefaultLineMapper<Customer> customerLineMapper = new DefaultLineMapper<>();
-
-		DelimitedLineTokenizer tokenizer = new DelimitedLineTokenizer();
-		tokenizer.setNames(new String[] {"id", "firstName", "lastName", "birthdate"});
-
-		customerLineMapper.setLineTokenizer(tokenizer);
-		customerLineMapper.setFieldSetMapper(new CustomerFieldSetMapper());
-		customerLineMapper.afterPropertiesSet();
-
-		reader.setLineMapper(customerLineMapper);
-
+		reader.setResource(new ClassPathResource("data/customer.xlsx"));
+		reader.setRowMapper(excelRowMapper());
 		return reader;
 	}
+	private RowMapper<Customer> excelRowMapper() {
+		BeanWrapperRowMapper<Customer> rowMapper = new BeanWrapperRowMapper<>();
+		rowMapper.setTargetType(Customer.class);
+//		return rowMapper;
+		return new CustomerExcelRowMapper();
+	}
+//	@Bean
+//	public FlatFileItemReader<Customer> customerItemReader() {
+//		FlatFileItemReader<Customer> reader = new FlatFileItemReader<>();
+//
+//		reader.setLinesToSkip(1);
+//		reader.setResource(new ClassPathResource("/data/customer.csv"));
+//		reader.setLineMapper(customerLineMapper());
+//
+//		return reader;
+//	}
+//	private LineMapper<Customer> customerLineMapper(){
+//		DefaultLineMapper<Customer> customerLineMapper = new DefaultLineMapper<>();
+//		DelimitedLineTokenizer tokenizer = new DelimitedLineTokenizer();
+//		tokenizer.setNames(new String[] {"id", "firstName", "lastName", "birthdate"});
+//
+//		customerLineMapper.setLineTokenizer(tokenizer);
+//		customerLineMapper.setFieldSetMapper(new CustomerFieldSetMapper());
+//		customerLineMapper.afterPropertiesSet();
+//		return customerLineMapper;
+//	}
 
 //	@Bean
-//	public ItemWriter<Customer> customerItemWriter() {
+//	public ItemWriter<Customer> customerItemWriterConsole() {
 //		return items -> {
 //			for (Customer item : items) {
 //				System.out.println(item.toString());
@@ -98,7 +117,8 @@ public class JobConfiguration {
 		return stepBuilderFactory.get("step1")
 				.allowStartIfComplete(true)
 				.<Customer, Customer>chunk(10)
-				.reader(customerItemReader())
+//				.reader(customerItemReader())
+				.reader(excelItemReader())
 				.writer(customerItemWriter())
 				.build();
 	}

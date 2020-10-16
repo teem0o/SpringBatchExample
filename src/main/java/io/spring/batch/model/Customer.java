@@ -22,14 +22,17 @@ import java.util.Date;
  */
 public class Customer {
 
-	private final long id;
+	private long id;
 
-	private final String firstName;
+	private String firstName;
 
-	private final String lastName;
+	private String lastName;
 
-	private final Date birthdate;
+	private Date birthdate;
 
+	public Customer(){
+
+	}
 	public Customer(long id, String firstName, String lastName, Date birthdate) {
 		this.id = id;
 		this.firstName = firstName;
@@ -41,16 +44,32 @@ public class Customer {
 		return id;
 	}
 
+	public void setId(long id) {
+		this.id = id;
+	}
+
 	public String getFirstName() {
 		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
 	}
 
 	public String getLastName() {
 		return lastName;
 	}
 
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
 	public Date getBirthdate() {
 		return birthdate;
+	}
+
+	public void setBirthdate(Date birthdate) {
+		this.birthdate = birthdate;
 	}
 
 	@Override
