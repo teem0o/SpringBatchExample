@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+
 @Controller
+@RequestMapping("job")
 public class JobLaunchingController {
     @Autowired
     JobLauncher jobLauncher;
@@ -18,7 +20,7 @@ public class JobLaunchingController {
     @Autowired
     Job job;
 
-    @RequestMapping("/launchjob")
+    @RequestMapping("launchJob")
     public String handle() throws Exception {
 
         Logger logger = LoggerFactory.getLogger(this.getClass());
